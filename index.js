@@ -20,12 +20,11 @@ app.get("/login", async (req, res) => {
         fs.mkdirSync("/app/output", { recursive: true });
 
         browser = await chromium.launch({
-            headless: true,
+            headless: no,
             args: [
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled"
+                "--disable-dev-shm-usage"
             ]
         });
 
