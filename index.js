@@ -17,8 +17,9 @@ app.get("/login", async (req, res) => {
     try {
 
         browser = await chromium.launch({
-            headless: true
-        });
+    headless: true,
+    channel: "chrome"
+});
 
         const page = await browser.newPage({
             viewport: {
