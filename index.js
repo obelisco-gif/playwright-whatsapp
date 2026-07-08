@@ -8,24 +8,28 @@ app.get("/", (req, res) => {
 });
 
 app.get("/test", async (req, res) => {
+
     const browser = await chromium.launch({
         headless: true
     });
 
     const page = await browser.newPage();
 
-    await page.goto("https://web.whatsapp.com");
+    await page.goto("https://web.whatsapp.com", {
+        waitUntil: "networkidle"
+    });
 
-    const title = await page.title();
+    await page.waitForTimeout(5000);
+
+    res.json({
+        url: page.url(),
+        title: await page.title(),
+        html: (await page.content()).substring(0,500)
+    });
 
     await browser.close();
 
-    res.json({
-        ok: true,
-        title
-    });
 });
-
 app.listen(3000, () => {
     console.log("Servidor iniciadov1");
 });
