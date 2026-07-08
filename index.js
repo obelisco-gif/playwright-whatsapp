@@ -4,6 +4,7 @@ const fs = require("fs");
 
 const app = express();
 
+// Servir archivos estáticos
 app.use("/output", express.static("/app/output"));
 
 app.get("/", (req, res) => {
@@ -45,7 +46,7 @@ app.get("/login", async (req, res) => {
         const page = await context.newPage();
 
         await page.goto("https://web.whatsapp.com", {
-            waitUntil: "domcontentloaded",
+            waitUntil: "networkidle",
             timeout: 60000
         });
 
@@ -53,22 +54,22 @@ app.get("/login", async (req, res) => {
 
         const title = await page.title();
 
-        const html = await page.content();
-
         await page.screenshot({
             path: "/app/output/whatsapp.png",
             fullPage: true
         });
 
-        res.json({
-            ok: true,
-            title,
-            url: page.url(),
-            screenshot: "/output/whatsapp.png",
-            htmlLength: html.length
-        });
+        const exists = fs.existsSync("/app/output/whatsapp.png");
 
         await browser.close();
+
+        res.json({
+            ok: true,
+            screenshotCreated: exists,
+            screenshotUrl: "/output/whatsapp.png",
+            title,
+            url: page.url()
+        });
 
     } catch (err) {
 
