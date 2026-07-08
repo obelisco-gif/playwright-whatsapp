@@ -1,24 +1,29 @@
 const express = require("express");
 const { chromium } = require("playwright");
+const fs = require("fs");
 
 const app = express();
+
+// Servir archivos estáticos
+app.use("/output", express.static("/app/output"));
 
 app.get("/", (req, res) => {
     res.send("Playwright API");
 });
 
-app.get("/test", async (req, res) => {
+app.get("/login", async (req, res) => {
     let browser;
 
     try {
+
         browser = await chromium.launch({
             headless: true
         });
 
         const page = await browser.newPage({
             viewport: {
-                width: 1280,
-                height: 720
+                width: 1400,
+                height: 900
             }
         });
 
@@ -29,22 +34,27 @@ app.get("/test", async (req, res) => {
 
         await page.waitForTimeout(5000);
 
-        const result = {
-            ok: true,
-            url: page.url(),
-            title: await page.title(),
-            htmlLength: (await page.content()).length,
-            htmlPreview: (await page.content()).substring(0, 500)
-        };
+        // Crear carpeta si no existe
+        fs.mkdirSync("/app/output", { recursive: true });
 
-        res.json(result);
+        // Guardar captura
+        await page.screenshot({
+            path: "/app/output/whatsapp.png",
+            fullPage: true
+        });
+
+        res.json({
+            ok: true,
+            screenshot: "/output/whatsapp.png",
+            url: page.url(),
+            title: await page.title()
+        });
 
     } catch (err) {
 
         res.status(500).json({
             ok: false,
-            error: err.message,
-            stack: err.stack
+            error: err.message
         });
 
     } finally {
@@ -57,5 +67,5 @@ app.get("/test", async (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log("🚀 Playwright API iniciada en puerto 3000");
+    console.log("Playwright API iniciada");
 });
